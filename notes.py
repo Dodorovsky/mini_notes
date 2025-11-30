@@ -345,6 +345,30 @@ format_dropdown.add_command(label="Decrease Font Size (Ctrl+-)", command=decreas
 format_btn.config(menu=format_dropdown)
 format_btn.pack(side="left", padx=5)
 
+# Toolbar debajo del menú
+toolbar = tk.Frame(root, bd=1, relief=tk.RAISED, background="#1C1C1B")
+toolbar.pack(side=tk.TOP, fill=tk.X)
+toolbar.pack_propagate(False)
+toolbar.config(height=20)
+btn_yellow = tk.Button(toolbar, text="--", fg="#F0E197", bg= "#F0E197", command=change_text_to_yellow)
+btn_yellow.pack(side=tk.LEFT, padx=(350,0), pady=(3, 2))
+
+btn_green = tk.Button(toolbar, text="--", fg="#4CB562", bg= "#4CB562", command=change_text_to_green)
+btn_green.pack(side=tk.LEFT, padx=5, pady=(3, 2))
+
+btn_red = tk.Button(toolbar, text="--", fg="#DE3B28", bg="#DE3B28",  command=change_text_to_red)
+btn_red.pack(side=tk.LEFT, pady=(3, 2))
+
+
+
+
+
+toolbar.pack(side=tk.TOP, fill=tk.X)
+
+
+
+
+
 text = tk.Text(
     root,
     wrap="word",
