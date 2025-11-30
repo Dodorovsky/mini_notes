@@ -251,6 +251,21 @@ def change_text_to_yellow():
     change_text_color("#F0E197")
 
 
+def increase_font_size():
+    """Increase the font size by 1."""
+    global FONT_SIZE
+    FONT_SIZE += 1
+    text.config(font=(FONT_FAMILY, FONT_SIZE))
+
+
+def decrease_font_size():
+    """Decrease the font size by 1 (minimum 8)."""
+    global FONT_SIZE
+    if FONT_SIZE > 8:  # Set minimum font size to 8
+        FONT_SIZE -= 1
+        text.config(font=(FONT_FAMILY, FONT_SIZE))
+
+
 def on_closing():
     if has_unsaved_changes():
         response = messagebox.askyesnocancel(
@@ -285,7 +300,8 @@ def enable_dark_title_bar(window):
 POWERSHELL_BG = "#0D0C0C"
 POWERSHELL_FG = "#CCCCCC"
 POWERSHELL_ACCENT = "#5f87ff"
-RETRO_FONT = ("Cascadia Code", 13)
+FONT_FAMILY = "Cascadia Code"
+FONT_SIZE = 13  # Initial font size
 
 root = tk.Tk()
 root.title("NP_100")
@@ -323,6 +339,9 @@ color_submenu.add_command(label="Red", command=change_text_to_red)
 color_submenu.add_command(label="Green", command=change_text_to_green)
 color_submenu.add_command(label="Yellow", command=change_text_to_yellow)
 format_dropdown.add_cascade(label="Text Color", menu=color_submenu)
+format_dropdown.add_separator()
+format_dropdown.add_command(label="Increase Font Size (Ctrl++)", command=increase_font_size)
+format_dropdown.add_command(label="Decrease Font Size (Ctrl+-)", command=decrease_font_size)
 format_btn.config(menu=format_dropdown)
 format_btn.pack(side="left", padx=5)
 
@@ -335,9 +354,33 @@ text = tk.Text(
     selectbackground=POWERSHELL_ACCENT,
     selectforeground=POWERSHELL_BG,
     highlightthickness=0,
-    font=RETRO_FONT
+    font=(FONT_FAMILY, FONT_SIZE)
 )
 text.pack(expand=1, fill="both")
+
+# Bind keyboard shortcuts for font size
+def on_font_increase(event):
+    increase_font_size()
+    return "break"
+
+def on_font_decrease(event):
+    decrease_font_size()
+    return "break"
+
+# Bind Ctrl + + for increasing font size
+# Handle different key combinations: Ctrl + = (which becomes + with Shift), Ctrl + +, Ctrl + = without Shift
+root.bind_all("<Control-equal>", on_font_increase)  # Ctrl + = (often used for zoom)
+root.bind_all("<Control-plus>", on_font_increase)   # Ctrl + + (numpad plus)
+root.bind_all("<Control-Key-plus>", on_font_increase)  # Alternative binding
+text.bind("<Control-equal>", on_font_increase)
+text.bind("<Control-plus>", on_font_increase)
+text.bind("<Control-Key-plus>", on_font_increase)
+
+# Bind Ctrl + - for decreasing font size
+root.bind_all("<Control-minus>", on_font_decrease)  # Ctrl + -
+root.bind_all("<Control-KP_Subtract>", on_font_decrease)  # Numpad minus
+text.bind("<Control-minus>", on_font_decrease)
+text.bind("<Control-KP_Subtract>", on_font_decrease)
 
 if len(sys.argv) > 1:
     file_path = sys.argv[1]
