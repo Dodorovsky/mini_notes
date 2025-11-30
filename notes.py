@@ -10,6 +10,7 @@ import re
 # Track original content to detect changes
 original_content = None
 file_format = None  # 'txt' or 'np100' to track format
+current_file_path = None  # Track the currently open file path
 
 
 def get_current_content():
@@ -131,7 +132,7 @@ def mark_as_modified(event=None):
 
 
 def open_file():
-    global original_content, file_format
+    global original_content, file_format, current_file_path
     file_path = filedialog.askopenfilename(
         title="Open File",
         filetypes=[("Text Files", "*.txt"), ("NP100 Files", "*.np100"), ("All Files", "*.*")]
@@ -147,6 +148,7 @@ def open_file():
                     if import_with_colors(content):
                         file_format = 'np100'
                         original_content = export_with_colors()  # Store in same format
+                        current_file_path = file_path  # Track current file path
                     else:
                         messagebox.showerror("Error", "Could not parse file format.")
                 else:
@@ -155,44 +157,61 @@ def open_file():
                     text.insert(tk.END, content)
                     file_format = 'txt'
                     original_content = content
+                    current_file_path = file_path  # Track current file path
         except Exception as e:
             messagebox.showerror("Error", f"Could not open file: {e}")
 
 
-def save_file():
-    global original_content, file_format
+def save_file_as():
+    """Save file with Save As dialog."""
+    global original_content, file_format, current_file_path
     file_path = filedialog.asksaveasfilename(
-        title="Save File",
-        defaultextension=".txt",
-        filetypes=[("Text Files", "*.txt"), ("NP100 Files", "*.np100"), ("All Files", "*.*")]
+        title="Save File As",
+        defaultextension=".np100",
+        filetypes=[("NP100 Files", "*.np100"), ("Text Files", "*.txt"), ("All Files", "*.*")]
     )
     if file_path:
-        try:
-            # Check if document has colors
-            has_colors = has_color_tags()
-            
-            # Determine format based on file extension or presence of colors
-            if file_path.endswith('.np100') or has_colors:
-                # Save with color information
-                content = export_with_colors()
-                file_format = 'np100'
-                if not file_path.endswith('.np100'):
-                    # Replace existing extension with .np100 or add it
-                    base_path = os.path.splitext(file_path)[0]
-                    file_path = base_path + '.np100'
-            else:
-                # Save as plain text
-                content = get_current_content()
-                file_format = 'txt'
-            
-            with open(file_path, "w", encoding="utf-8") as file:
-                file.write(content)
-            original_content = content  # Reset original content after saving
-            return True
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not save file: {e}")
-            return False
+        return _perform_save(file_path)
     return False
+
+
+def _perform_save(file_path):
+    """Internal function to perform the actual save operation."""
+    global original_content, file_format, current_file_path
+    try:
+        # Always default to .np100 format unless explicitly .txt
+        if file_path.endswith('.txt'):
+            # User explicitly chose .txt, save as plain text
+            content = get_current_content()
+            file_format = 'txt'
+        else:
+            # Default to .np100 format (saves with color information in JSON)
+            content = export_with_colors()
+            file_format = 'np100'
+            if not file_path.endswith('.np100'):
+                # Replace existing extension with .np100 or add it
+                base_path = os.path.splitext(file_path)[0]
+                file_path = base_path + '.np100'
+        
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(content)
+        original_content = content  # Reset original content after saving
+        current_file_path = file_path  # Update current file path
+        return True
+    except Exception as e:
+        messagebox.showerror("Error", f"Could not save file: {e}")
+        return False
+
+
+def save_file():
+    """Save file directly if file path exists, otherwise show Save As dialog."""
+    global current_file_path
+    if current_file_path and os.path.exists(current_file_path):
+        # File exists, save directly
+        return _perform_save(current_file_path)
+    else:
+        # No file path, show Save As dialog
+        return save_file_as()
 
 
 def change_text_color(color):
@@ -293,6 +312,7 @@ file_btn = tk.Menubutton(menubar_frame, text="File", bg="#4A4A4A", fg=POWERSHELL
 file_dropdown = tk.Menu(file_btn, tearoff=0, bg="#4A4A4A", fg=POWERSHELL_FG)
 file_dropdown.add_command(label="Open", command=open_file)
 file_dropdown.add_command(label="Save", command=save_file)
+file_dropdown.add_command(label="Save As", command=save_file_as)
 file_btn.config(menu=file_dropdown)
 file_btn.pack(side="left", padx=5)
 
@@ -331,25 +351,30 @@ if len(sys.argv) > 1:
                 if import_with_colors(content):
                     file_format = 'np100'
                     original_content = export_with_colors()  # Store in same format
+                    current_file_path = file_path  # Track current file path
                 else:
                     error_msg = "Error: No se pudo analizar el formato del archivo."
                     text.insert("1.0", error_msg)
                     original_content = error_msg
+                    current_file_path = None
             else:
                 # Load as plain text
                 text.insert("1.0", content)
                 file_format = 'txt'
                 original_content = content
+                current_file_path = file_path  # Track current file path
     except Exception as e:
         error_msg = f"Error al abrir archivo: {e}"
         text.insert("1.0", error_msg)
         original_content = error_msg
         file_format = 'txt'
+        current_file_path = None
 else:
     default_text = "Nuevo documento..."
     text.insert("1.0", default_text)
     original_content = default_text
     file_format = 'txt'
+    current_file_path = None
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
