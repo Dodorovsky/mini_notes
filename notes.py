@@ -239,6 +239,12 @@ def change_text_color(color):
         messagebox.showerror("Error", f"Could not change text color: {e}")
 
 
+def change_text_to_white():
+    change_text_color("#CCCCCC")
+    
+def change_text_to_blue():
+    change_text_color("#8AB5FF")#7EAAF7
+
 def change_text_to_red():
     change_text_color("#DE3B28") #DE3F1F
 
@@ -304,10 +310,10 @@ FONT_FAMILY = "Cascadia Code"
 FONT_SIZE = 13  # Initial font size
 
 root = tk.Tk()
-root.title("NP_100")
+root.title("mini_notes")
 root.configure(bg=POWERSHELL_BG)
 base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-icon_path = os.path.join(base_path, "NP_100.ico")
+icon_path = os.path.join(base_path, "mini_notes.ico")
 
 
 root.iconbitmap(icon_path)
@@ -338,6 +344,8 @@ color_submenu = tk.Menu(format_dropdown, tearoff=0, bg="#4A4A4A", fg=POWERSHELL_
 color_submenu.add_command(label="Red", command=change_text_to_red)
 color_submenu.add_command(label="Green", command=change_text_to_green)
 color_submenu.add_command(label="Yellow", command=change_text_to_yellow)
+color_submenu.add_command(label="White", command=change_text_to_white)
+color_submenu.add_command(label="Blue", command=change_text_to_blue)
 format_dropdown.add_cascade(label="Text Color", menu=color_submenu)
 format_dropdown.add_separator()
 format_dropdown.add_command(label="Increase Font Size (Ctrl++)", command=increase_font_size)
@@ -350,6 +358,12 @@ toolbar = tk.Frame(root, bd=1, relief=tk.RAISED, background="#1C1C1B")
 toolbar.pack(side=tk.TOP, fill=tk.X)
 toolbar.pack_propagate(False)
 toolbar.config(height=20)
+btn_white= tk.Button(toolbar, text="--", fg="#CCCCCC", bg= "#CCCCCC", command=change_text_to_white)
+btn_white.pack(side=tk.LEFT, padx=(10,5), pady=(3, 2))
+
+btn_blue= tk.Button(toolbar, text="--", fg="#8AB5FF", bg= "#8AB5FF", command=change_text_to_blue)
+btn_blue.pack(side=tk.LEFT, padx=(0), pady=(3, 2))
+
 btn_yellow = tk.Button(toolbar, text="--", fg="#F0E197", bg= "#F0E197", command=change_text_to_yellow)
 btn_yellow.pack(side=tk.LEFT, padx=(350,0), pady=(3, 2))
 
@@ -437,7 +451,7 @@ if len(sys.argv) > 1:
         file_format = 'txt'
         current_file_path = None
 else:
-    default_text = "Nuevo documento..."
+    default_text = ""
     text.insert("1.0", default_text)
     original_content = default_text
     file_format = 'txt'
