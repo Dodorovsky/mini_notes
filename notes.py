@@ -131,45 +131,72 @@ def mark_as_modified(event=None):
     pass
 
 
-def open_file():
+def load_file(file_path):
     global original_content, file_format, current_file_path
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Detect format
+        ext = os.path.splitext(file_path)[1].lower()
+
+        is_mini = (
+            ext == ".mini"
+            or ext == ".np100"
+            or (content.strip().startswith("{") and '"format":"np100"' in content)
+        )
+
+        if is_mini:
+            if import_with_colors(content):
+                file_format = "np100"
+                original_content = export_with_colors()
+            else:
+                raise ValueError("Could not parse NP100/MINI file.")
+        else:
+            text.delete("1.0", tk.END)
+            text.insert("1.0", content)
+            file_format = "txt"
+            original_content = content
+
+        # Update state
+        current_file_path = file_path
+        root.title(f"mini_notes - {os.path.basename(file_path)}")
+
+    except Exception as e:
+        text.delete("1.0", tk.END)
+        text.insert("1.0", f"Error opening file: {e}")
+        original_content = ""
+        file_format = "txt"
+        current_file_path = None
+
+
+def open_file():
     file_path = filedialog.askopenfilename(
         title="Open File",
-        filetypes=[("Text Files", "*.txt"), ("NP100 Files", "*.np100"), ("All Files", "*.*")]
-    )
-    if file_path:
-        try:
-            with open(file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-                
-                # Try to detect if it's a custom format file
-                if file_path.endswith('.np100') or (content.strip().startswith('{') and '"format":"np100"' in content):
-                    # Load custom format with colors
-                    if import_with_colors(content):
-                        file_format = 'np100'
-                        original_content = export_with_colors()  # Store in same format
-                        current_file_path = file_path  # Track current file path
-                    else:
-                        messagebox.showerror("Error", "Could not parse file format.")
-                else:
-                    # Load as plain text
-                    text.delete("1.0", tk.END)
-                    text.insert(tk.END, content)
-                    file_format = 'txt'
-                    original_content = content
-                    current_file_path = file_path  # Track current file path
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not open file: {e}")
+        filetypes=[
+            ("All Supported Files", "*.mini *.np100 *.txt"),
+            ("Mini Notes Files", "*.mini *.np100"),
+            ("Mini Files", "*.mini"),
+            ("Legacy NP100 Files", "*.np100"),
+            ("Text Files", "*.txt"),
+            ("All Files", "*.*")
+        ]
 
+
+
+    )
+
+    if file_path:
+        load_file(file_path)
 
 def save_file_as():
     """Save file with Save As dialog."""
     global original_content, file_format, current_file_path
     file_path = filedialog.asksaveasfilename(
         title="Save File As",
-        defaultextension=".np100",
-        filetypes=[("NP100 Files", "*.np100"), ("Text Files", "*.txt"), ("All Files", "*.*")]
-    )
+        defaultextension=".mini",
+        filetypes=[ ("Mini Notes Files", "*.mini"), ("Legacy NP100 Files", "*.np100"), ("Text Files", "*.txt"), ("All Files", "*.*") ] )
     if file_path:
         return _perform_save(file_path)
     return False
@@ -178,29 +205,41 @@ def save_file_as():
 def _perform_save(file_path):
     """Internal function to perform the actual save operation."""
     global original_content, file_format, current_file_path
+
     try:
-        # Always default to .np100 format unless explicitly .txt
-        if file_path.endswith('.txt'):
-            # User explicitly chose .txt, save as plain text
+        ext = os.path.splitext(file_path)[1].lower()
+
+        if ext == ".txt":
+            # Save as plain text
             content = get_current_content()
-            file_format = 'txt'
-        else:
-            # Default to .np100 format (saves with color information in JSON)
+            file_format = "txt"
+
+        elif ext in (".mini", ".np100"):
+            # Save in mini_notes JSON format (with colors)
             content = export_with_colors()
-            file_format = 'np100'
-            if not file_path.endswith('.np100'):
-                # Replace existing extension with .np100 or add it
-                base_path = os.path.splitext(file_path)[0]
-                file_path = base_path + '.np100'
-        
+            file_format = "np100"  # internal format stays np100
+
+        else:
+            # Unknown extension → default to .mini
+            base_path = os.path.splitext(file_path)[0]
+            file_path = base_path + ".mini"
+            content = export_with_colors()
+            file_format = "np100"
+
+        # Write file
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(content)
-        original_content = content  # Reset original content after saving
-        current_file_path = file_path  # Update current file path
+
+        # Update state
+        original_content = content
+        current_file_path = file_path
+
         return True
+
     except Exception as e:
         messagebox.showerror("Error", f"Could not save file: {e}")
         return False
+
 
 
 def save_file():
@@ -242,8 +281,10 @@ def change_text_color(color):
 def change_text_to_white():
     change_text_color("#CCCCCC")
     
+    
 def change_text_to_blue():
     change_text_color("#8AB5FF")#7EAAF7
+
 
 def change_text_to_red():
     change_text_color("#DE3B28") #DE3F1F
@@ -303,6 +344,12 @@ def enable_dark_title_bar(window):
         pass
 
 
+def resource_path(*paths):
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, *paths)
+
+
+
 POWERSHELL_BG = "#0D0C0C"
 POWERSHELL_FG = "#CCCCCC"
 POWERSHELL_ACCENT = "#5f87ff"
@@ -312,11 +359,12 @@ FONT_SIZE = 13  # Initial font size
 root = tk.Tk()
 root.title("mini_notes")
 root.configure(bg=POWERSHELL_BG)
-base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-icon_path = os.path.join(base_path, "mini_notes.ico")
+
+icon_image = tk.PhotoImage(file=resource_path("assets", "mini_notes.png"))
+root.iconphoto(True, icon_image)
 
 
-root.iconbitmap(icon_path)
+
 root.update_idletasks()
 enable_dark_title_bar(root)
 root.option_add("*Menu.background", POWERSHELL_BG)
@@ -421,41 +469,13 @@ text.bind("<Control-minus>", on_font_decrease)
 text.bind("<Control-KP_Subtract>", on_font_decrease)
 
 if len(sys.argv) > 1:
-    file_path = sys.argv[1]
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-            
-            # Try to detect if it's a custom format file
-            if file_path.endswith('.np100') or (content.strip().startswith('{') and '"format":"np100"' in content):
-                # Load custom format with colors
-                if import_with_colors(content):
-                    file_format = 'np100'
-                    original_content = export_with_colors()  # Store in same format
-                    current_file_path = file_path  # Track current file path
-                else:
-                    error_msg = "Error: No se pudo analizar el formato del archivo."
-                    text.insert("1.0", error_msg)
-                    original_content = error_msg
-                    current_file_path = None
-            else:
-                # Load as plain text
-                text.insert("1.0", content)
-                file_format = 'txt'
-                original_content = content
-                current_file_path = file_path  # Track current file path
-    except Exception as e:
-        error_msg = f"Error al abrir archivo: {e}"
-        text.insert("1.0", error_msg)
-        original_content = error_msg
-        file_format = 'txt'
-        current_file_path = None
+    load_file(sys.argv[1])
 else:
-    default_text = ""
-    text.insert("1.0", default_text)
-    original_content = default_text
-    file_format = 'txt'
+    text.insert("1.0", "")
+    original_content = ""
+    file_format = "txt"
     current_file_path = None
+
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
