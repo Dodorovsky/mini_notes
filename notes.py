@@ -12,6 +12,9 @@ original_content = None
 file_format = None  # 'txt' or 'np100' to track format
 current_file_path = None  # Track the currently open file path
 
+FONT_SIZE = 14 
+FONT_FAMILY = "Consolas"
+
 def get_current_content():
     """Get the current content of the text widget."""
     content = text.get("1.0", tk.END)
@@ -243,7 +246,6 @@ def _perform_save(file_path):
 
 def save_file():
     """Save file directly if file path exists, otherwise show Save As dialog."""
-    global current_file_path
     if current_file_path and os.path.exists(current_file_path):
         # File exists, save directly
         return _perform_save(current_file_path)
@@ -380,19 +382,19 @@ toolbar = tk.Frame(root, bd=1, relief=tk.RAISED, background="#1C1C1B")
 toolbar.pack(side=tk.TOP, fill=tk.X)
 toolbar.pack_propagate(False)
 toolbar.config(height=20)
-btn_white= tk.Button(toolbar, text="--", fg="#CCCCCC", bg= "#CCCCCC", command=change_text_to_white)
+btn_white= tk.Button(toolbar, text="000", fg="#CCCCCC", bg= "#CCCCCC", command=change_text_to_white)
 btn_white.pack(side=tk.LEFT, padx=(10,5), pady=(3, 2))
 
-btn_blue= tk.Button(toolbar, text="--", fg="#8AB5FF", bg= "#8AB5FF", command=change_text_to_blue)
+btn_blue= tk.Button(toolbar, text="000", fg="#8AB5FF", bg= "#8AB5FF", command=change_text_to_blue)
 btn_blue.pack(side=tk.LEFT, padx=(0), pady=(3, 2))
 
-btn_yellow = tk.Button(toolbar, text="--", fg="#F0E197", bg= "#F0E197", command=change_text_to_yellow)
-btn_yellow.pack(side=tk.LEFT, padx=(350,0), pady=(3, 2))
+btn_yellow = tk.Button(toolbar, text="000", fg="#F0E197", bg= "#F0E197", command=change_text_to_yellow)
+btn_yellow.pack(side=tk.LEFT, padx=(280,0), pady=(3, 2))
 
-btn_green = tk.Button(toolbar, text="--", fg="#4CB562", bg= "#4CB562", command=change_text_to_green)
+btn_green = tk.Button(toolbar, text="000", fg="#4CB562", bg= "#4CB562", command=change_text_to_green)
 btn_green.pack(side=tk.LEFT, padx=5, pady=(3, 2))
 
-btn_red = tk.Button(toolbar, text="--", fg="#DE3B28", bg="#DE3B28",  command=change_text_to_red)
+btn_red = tk.Button(toolbar, text="000", fg="#DE3B28", bg="#DE3B28",  command=change_text_to_red)
 btn_red.pack(side=tk.LEFT, pady=(3, 2))
 
 toolbar.pack(side=tk.TOP, fill=tk.X)
@@ -428,6 +430,9 @@ text = tk.Text(
     selectbackground=POWERSHELL_ACCENT,
     selectforeground=POWERSHELL_BG,
     highlightthickness=0,
+    undo=True,
+    autoseparators=True,
+    maxundo=-1,
     font=(FONT_FAMILY, FONT_SIZE)
 )
 text.pack(side="left", expand=True, fill="both")
@@ -484,6 +489,13 @@ scroll_canvas.tag_bind(thumb, "<Leave>", on_thumb_leave)
 def scroll_wheel(event):
     text.yview_scroll(int(-1 * (event.delta / 120)), "units")
     update_thumb()
+    
+def save_shortcut(event=None):
+    if current_file_path:
+        save_file()
+    else:
+        save_file_as()
+
 
 scroll_canvas.bind("<Button-1>", scroll_drag)
 scroll_canvas.bind("<B1-Motion>", scroll_drag)
@@ -534,6 +546,9 @@ root.bind_all("<Control-Key-plus>", on_font_increase)  # Alternative binding
 text.bind("<Control-equal>", on_font_increase)
 text.bind("<Control-plus>", on_font_increase)
 text.bind("<Control-Key-plus>", on_font_increase)
+
+# Ctrl + S shortcut
+root.bind("<Control-s>", save_shortcut)
 
 # Bind Ctrl + - for decreasing font size
 root.bind_all("<Control-minus>", on_font_decrease)  # Ctrl + -
