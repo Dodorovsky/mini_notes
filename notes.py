@@ -388,6 +388,31 @@ def search_text(event=None):
 def clear_search_highlight():
     text.tag_remove("search_highlight", "1.0", "end")
 
+def apply_color(tag):
+    try:
+        start = text.index("sel.first")
+        end = text.index("sel.last")
+    except tk.TclError:
+        return  
+
+    # Remove previous colors
+    for t in ["color_red", "color_blue", "color_green", "color_yellow", "color_white"]:
+        text.tag_remove(t, start, end)
+
+    # Apply the new color
+    text.tag_add(tag, start, end)
+    
+def remove_color():
+    try:
+        start = text.index("sel.first")
+        end = text.index("sel.last")
+    except tk.TclError:
+        return
+
+    for t in ["color_red", "color_blue", "color_green", "color_yellow", "color_white"]:
+        text.tag_remove(t, start, end)
+
+
 
 
 POWERSHELL_BG = "#0D0C0C"
@@ -422,19 +447,19 @@ toolbar = tk.Frame(root, bd=1, relief=tk.RAISED, background="#1C1C1B")
 toolbar.pack(side=tk.TOP, fill=tk.X)
 toolbar.pack_propagate(False)
 toolbar.config(height=20)
-btn_white= tk.Button(toolbar, text="000", fg="#CCCCCC", bg= "#CCCCCC", command=change_text_to_white)
+btn_white= tk.Button(toolbar, text="00", fg="#CCCCCC", bg= "#CCCCCC", command=change_text_to_white)
 btn_white.pack(side=tk.LEFT, padx=(10,5), pady=(3, 2))
 
-btn_blue= tk.Button(toolbar, text="000", fg="#8AB5FF", bg= "#8AB5FF", command=change_text_to_blue)
+btn_blue= tk.Button(toolbar, text="00", fg="#8AB5FF", bg= "#8AB5FF", command=change_text_to_blue)
 btn_blue.pack(side=tk.LEFT, padx=(0), pady=(3, 2))
 
-btn_yellow = tk.Button(toolbar, text="000", fg="#F0E197", bg= "#F0E197", command=change_text_to_yellow)
+btn_yellow = tk.Button(toolbar, text="00", fg="#F0E197", bg= "#F0E197", command=change_text_to_yellow)
 btn_yellow.pack(side=tk.LEFT, padx=(280,0), pady=(3, 2))
 
-btn_green = tk.Button(toolbar, text="000", fg="#4CB562", bg= "#4CB562", command=change_text_to_green)
+btn_green = tk.Button(toolbar, text="00", fg="#4CB562", bg= "#4CB562", command=change_text_to_green)
 btn_green.pack(side=tk.LEFT, padx=5, pady=(3, 2))
 
-btn_red = tk.Button(toolbar, text="000", fg="#DE3B28", bg="#DE3B28",  command=change_text_to_red)
+btn_red = tk.Button(toolbar, text="00", fg="#DE3B28", bg="#DE3B28",  command=change_text_to_red)
 btn_red.pack(side=tk.LEFT, pady=(3, 2))
 
 toolbar.pack(side=tk.TOP, fill=tk.X)
@@ -479,6 +504,16 @@ text.pack(side="left", expand=True, fill="both")
 
 text.tag_config("search_highlight", background="yellow")
 
+text.tag_config("color_red", foreground="#DE3B28")
+text.tag_config("color_blue", foreground="#8AB5FF")
+text.tag_config("color_green", foreground="#4CB562")
+text.tag_config("color_yellow", foreground="#F0E197")
+text.tag_config("color_white", foreground="#CCCCCC")
+
+def show_context_menu(event):
+    context_menu.tk_popup(event.x_root, event.y_root)
+
+text.bind("<Button-3>", show_context_menu)
 
 def update_thumb(*args):
     text.update_idletasks()
@@ -549,6 +584,16 @@ text.bind("<Configure>", update_thumb)
 text.bind("<KeyRelease>", update_thumb)
 root.bind("<Control-MouseWheel>", zoom_with_wheel)
 root.bind("<Control-f>", show_search_bar)
+
+context_menu = tk.Menu(root, tearoff=0)
+context_menu.add_command(label="Verde", command=lambda: apply_color("color_green"))
+context_menu.add_command(label="Amarillo", command=lambda: apply_color("color_yellow"))
+context_menu.add_command(label="Rojo", command=lambda: apply_color("color_red"))
+context_menu.add_command(label="Azul", command=lambda: apply_color("color_blue"))
+context_menu.add_command(label="Blanco", command=lambda: apply_color("color_white"))
+context_menu.add_separator()
+context_menu.add_command(label="Quitar color", command=remove_color)
+
 
 
 file_btn = tk.Menubutton(menubar_frame, text="File", bg="#4A4A4A", fg=POWERSHELL_FG)
