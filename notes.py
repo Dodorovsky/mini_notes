@@ -349,6 +349,12 @@ def resource_path(*paths):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, *paths)
 
+def zoom_with_wheel(event):
+    if event.delta > 0:
+        increase_font_size()
+    else:
+        decrease_font_size()
+
 
 POWERSHELL_BG = "#0D0C0C"
 POWERSHELL_FG = "#CCCCCC"
@@ -504,6 +510,8 @@ text.bind("<MouseWheel>", scroll_wheel)
 text.bind("<<Modified>>", update_thumb)
 text.bind("<Configure>", update_thumb)
 text.bind("<KeyRelease>", update_thumb)
+root.bind("<Control-MouseWheel>", zoom_with_wheel)
+
 
 
 file_btn = tk.Menubutton(menubar_frame, text="File", bg="#4A4A4A", fg=POWERSHELL_FG)
