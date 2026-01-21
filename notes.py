@@ -355,6 +355,40 @@ def zoom_with_wheel(event):
     else:
         decrease_font_size()
 
+def show_search_bar(event=None):
+    search_frame.pack(fill="x")
+    search_entry.focus()
+
+def hide_search_bar():
+    search_frame.pack_forget()
+    clear_search_highlight()
+    
+def search_text(event=None):
+    query = search_entry.get()
+    clear_search_highlight()
+
+    if not query:
+        return
+
+    start = "1.0"
+    while True:
+        pos = text.search(query, start, stopindex="end")
+        if not pos:
+            break
+
+        end = f"{pos}+{len(query)}c"
+        text.tag_add("search_highlight", pos, end)
+
+        if start == "1.0":
+            text.mark_set("insert", pos)
+            text.see(pos)
+
+        start = end
+
+def clear_search_highlight():
+    text.tag_remove("search_highlight", "1.0", "end")
+
+
 
 POWERSHELL_BG = "#0D0C0C"
 POWERSHELL_FG = "#CCCCCC"
@@ -443,6 +477,9 @@ text = tk.Text(
 )
 text.pack(side="left", expand=True, fill="both")
 
+text.tag_config("search_highlight", background="yellow")
+
+
 def update_thumb(*args):
     text.update_idletasks()
 
@@ -511,7 +548,7 @@ text.bind("<<Modified>>", update_thumb)
 text.bind("<Configure>", update_thumb)
 text.bind("<KeyRelease>", update_thumb)
 root.bind("<Control-MouseWheel>", zoom_with_wheel)
-
+root.bind("<Control-f>", show_search_bar)
 
 
 file_btn = tk.Menubutton(menubar_frame, text="File", bg="#4A4A4A", fg=POWERSHELL_FG)
@@ -571,6 +608,15 @@ else:
     original_content = ""
     file_format = "txt"
     current_file_path = None
+    
+search_frame = tk.Frame(root)
+search_entry = tk.Entry(search_frame)
+search_entry.pack(side="left", fill="x", expand=True)
+
+close_search_btn = tk.Button(search_frame, text="X", command=lambda: hide_search_bar())
+close_search_btn.pack(side="right")
+
+search_entry.bind("<KeyRelease>", search_text)
 
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
