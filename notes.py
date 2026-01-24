@@ -1,19 +1,27 @@
-import sys
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
-import ctypes
+import sys, os, json, ctypes, re
 import os
 import json
-import re
 
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+
+FONT_SIZE = 14 
+FONT_FAMILY = "Consolas"
+
+POWERSHELL_BG = "#0D0C0C"
+POWERSHELL_FG = "#CCCCCC"
+POWERSHELL_ACCENT = "#5fe2ff"#5f87ff
+FONT_FAMILY = "Cascadia Code"
+FONT_SIZE = 13  # Initial font size
 
 # Track original content to detect changes
 original_content = None
 file_format = None  # 'txt' or 'np100' to track format
 current_file_path = None  # Track the currently open file path
 
-FONT_SIZE = 14 
-FONT_FAMILY = "Consolas"
+def resource_path(*paths):
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, *paths)
 
 def get_current_content():
     """Get the current content of the text widget."""
@@ -23,12 +31,10 @@ def get_current_content():
         content = content[:-1]
     return content
 
-
 def has_color_tags():
     """Check if the text widget has any color tags."""
     all_tags = text.tag_names()
     return any(tag.startswith("color_") for tag in all_tags)
-
 
 def export_with_colors():
     """Export text widget content with color tags to custom format (JSON)."""
@@ -64,7 +70,6 @@ def export_with_colors():
     
     return json.dumps(document, ensure_ascii=False, indent=2)
 
-
 def import_with_colors(json_content):
     """Import content from custom format and restore color tags."""
     try:
@@ -93,30 +98,8 @@ def import_with_colors(json_content):
     except json.JSONDecodeError:
         return False
 
-
 def has_unsaved_changes():
-    """Check if there are unsaved changes by comparing current content with original."""
-    if original_content is None:
-        return False
-    
-    # Determine format to use for comparison
-    # If original content is JSON format, use that format; otherwise check for colors
-    use_colored_format = False
-    if file_format == 'np100':
-        use_colored_format = True
-    elif original_content.strip().startswith('{') and '"format":"np100"' in original_content:
-        use_colored_format = True
-    elif has_color_tags():
-        use_colored_format = True
-    
-    # Get current content in the same format as original
-    if use_colored_format:
-        current = export_with_colors()
-    else:
-        current = get_current_content()
-    
-    return current != original_content
-
+    return text.edit_modified()
 
 def reset_original_content():
     """Reset the original content to the current content (after save/open)."""
@@ -126,12 +109,10 @@ def reset_original_content():
     else:
         original_content = get_current_content()
 
-
 def mark_as_modified(event=None):
     """Mark that the document has been modified (called on text changes)."""
     # This function can be used for future enhancements like showing * in title
     pass
-
 
 def load_file(file_path):
     global original_content, file_format, current_file_path
@@ -164,6 +145,8 @@ def load_file(file_path):
         # Update state
         current_file_path = file_path
         root.title(f"mini_notes - {os.path.basename(file_path)}")
+        text.edit_modified(False)
+
 
     except Exception as e:
         text.delete("1.0", tk.END)
@@ -171,7 +154,6 @@ def load_file(file_path):
         original_content = ""
         file_format = "txt"
         current_file_path = None
-
 
 def open_file():
     file_path = filedialog.askopenfilename(
@@ -185,25 +167,19 @@ def open_file():
             ("All Files", "*.*")
         ]
 
-
-
     )
 
     if file_path:
         load_file(file_path)
 
-
 def save_file_as():
-    """Save file with Save As dialog."""
-    global original_content, file_format, current_file_path
-    file_path = filedialog.asksaveasfilename(
-        title="Save File As",
-        defaultextension=".mini",
-        filetypes=[ ("Mini Notes Files", "*.mini"), ("Legacy NP100 Files", "*.np100"), ("Text Files", "*.txt"), ("All Files", "*.*") ] )
-    if file_path:
-        return _perform_save(file_path)
-    return False
+    file_path = filedialog.asksaveasfilename(...)
+    if not file_path:
+        return False
 
+    result = _perform_save(file_path)
+    text.edit_modified(False)
+    return result
 
 def _perform_save(file_path):
     """Internal function to perform the actual save operation."""
@@ -243,16 +219,16 @@ def _perform_save(file_path):
         messagebox.showerror("Error", f"Could not save file: {e}")
         return False
 
-
 def save_file():
     """Save file directly if file path exists, otherwise show Save As dialog."""
     if current_file_path and os.path.exists(current_file_path):
-        # File exists, save directly
-        return _perform_save(current_file_path)
+        result = _perform_save(current_file_path)
+        text.edit_modified(False)
+        return result
     else:
-        # No file path, show Save As dialog
-        return save_file_as()
-
+        result = save_file_as()
+        text.edit_modified(False)
+        return result
 
 def change_text_color(color):
     """Change the color of selected text to the specified color."""
@@ -278,33 +254,26 @@ def change_text_color(color):
     except Exception as e:
         messagebox.showerror("Error", f"Could not change text color: {e}")
 
-
 def change_text_to_white():
     change_text_color("#CCCCCC")
-    
     
 def change_text_to_blue():
     change_text_color("#8AB5FF")#7EAAF7
 
-
 def change_text_to_red():
     change_text_color("#DE3B28") #DE3F1F
-
 
 def change_text_to_green():
     change_text_color("#4CB562")
 
-
 def change_text_to_yellow():
     change_text_color("#F0E197")
-
 
 def increase_font_size():
     """Increase the font size by 1."""
     global FONT_SIZE
     FONT_SIZE += 1
     text.config(font=(FONT_FAMILY, FONT_SIZE))
-
 
 def decrease_font_size():
     """Decrease the font size by 1 (minimum 8)."""
@@ -313,7 +282,6 @@ def decrease_font_size():
         FONT_SIZE -= 1
         text.config(font=(FONT_FAMILY, FONT_SIZE))
 
-
 def on_closing():
     if has_unsaved_changes():
         response = messagebox.askyesnocancel(
@@ -321,12 +289,19 @@ def on_closing():
             "Do you want to save changes before closing?"
         )
         if response is None:
-            return
-        if response:
+            return  # Cancel
+        if response:  # Yes, save
             if not save_file():
-                return
-    root.destroy()
+                return  # If saving fails, do not close
+            root.destroy()  # Saved OK → close immediately
+            return
+        else:
+            # Do not save → close directly
+            root.destroy()
+            return
 
+    # No changes → close
+    root.destroy()
 
 def enable_dark_title_bar(window):
     if sys.platform != "win32":
@@ -343,11 +318,6 @@ def enable_dark_title_bar(window):
         )
     except Exception:
         pass
-
-
-def resource_path(*paths):
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, *paths)
 
 def zoom_with_wheel(event):
     if event.delta > 0:
@@ -412,14 +382,6 @@ def remove_color():
     for t in ["color_red", "color_blue", "color_green", "color_yellow", "color_white"]:
         text.tag_remove(t, start, end)
 
-
-
-
-POWERSHELL_BG = "#0D0C0C"
-POWERSHELL_FG = "#CCCCCC"
-POWERSHELL_ACCENT = "#5fe2ff"#5f87ff
-FONT_FAMILY = "Cascadia Code"
-FONT_SIZE = 13  # Initial font size
 
 root = tk.Tk()
 root.title("mini_notes")
@@ -503,6 +465,9 @@ text = tk.Text(
 text.pack(side="left", expand=True, fill="both")
 
 text.tag_config("search_highlight", background="yellow")
+text.insert("1.0", "\n\n")
+text.edit_modified(False)
+
 
 text.tag_config("color_red", foreground="#DE3B28")
 text.tag_config("color_blue", foreground="#8AB5FF")
@@ -556,7 +521,7 @@ def scroll_drag(event):
     update_thumb()
 
 def on_thumb_enter(event):
-    scroll_canvas.itemconfig(thumb, fill="#4FA3FF")  # hover
+    scroll_canvas.itemconfig(thumb, fill="#FEF89E")  # hover
 
 def on_thumb_leave(event):
     scroll_canvas.itemconfig(thumb, fill=POWERSHELL_ACCENT)  # normal
