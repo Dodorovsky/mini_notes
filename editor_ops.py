@@ -67,7 +67,6 @@ def search_text(event, text, search_entry):
 def clear_search_highlight(text):
     text.tag_remove("search_highlight", "1.0", "end")
 
-
 # -----------------------------
 # COLOR TAGS
 # -----------------------------
@@ -102,7 +101,6 @@ def change_text_color(text, color):
     except Exception as e:
         messagebox.showerror("Error", f"Could not change text color: {e}")
 
-
 def change_text_to_white(text):
     change_text_color(text, "#CCCCCC")
 
@@ -121,7 +119,6 @@ def change_text_to_green(text):
 
 def change_text_to_yellow(text):
     change_text_color(text, "#F0E197")
-
 
 # -----------------------------
 # COLOR EXPORT / IMPORT

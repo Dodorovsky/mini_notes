@@ -146,6 +146,16 @@ def run_app():
     root.bind("<Control-MouseWheel>", lambda e: zoom_with_wheel(
         e, text, FONT_FAMILY, state["font_size_state"]
     ))
+    
+    # Zoom con Ctrl + +
+    root.bind("<Control-plus>", lambda e: increase_font_size(text, FONT_FAMILY, state["font_size_state"]))
+    root.bind("<Control-KP_Add>", lambda e: increase_font_size(text, FONT_FAMILY, state["font_size_state"]))  
+
+    # Zoom con Ctrl + -
+    root.bind("<Control-minus>", lambda e: decrease_font_size(text, FONT_FAMILY, state["font_size_state"]))
+    root.bind("<Control-KP_Subtract>", lambda e: decrease_font_size(text, FONT_FAMILY, state["font_size_state"])) 
+
+    
     root.bind("<Control-f>", lambda e: show_search_bar(search_frame, search_entry))
 
     search_entry.bind("<KeyRelease>", lambda e: search_text(e, text, search_entry))
