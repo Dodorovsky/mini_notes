@@ -1,4 +1,5 @@
 import tkinter as tk
+from file_ops import open_file
 from config import (
     WINDOW_TITLE, FONT_FAMILY, FONT_SIZE,
     POWERSHELL_ACCENT, POWERSHELL_BG, POWERSHELL_FG, POWERSHELL_ACCENT_HOVER
@@ -57,9 +58,6 @@ def build_ui(root):
         outline=POWERSHELL_ACCENT
     )
 
-
-
-
     # --- TEXT WIDGET ---
     text = tk.Text(
         editor_frame,
@@ -75,6 +73,7 @@ def build_ui(root):
         maxundo=-1,
         font=(FONT_FAMILY, FONT_SIZE)
     )
+    
     text.pack(side="left", expand=True, fill="both")
 
     # --- SEARCH BAR ---
@@ -141,7 +140,6 @@ def build_ui(root):
     # Hover del thumb
     scroll_canvas.tag_bind(thumb, "<Enter>", on_enter)
     scroll_canvas.tag_bind(thumb, "<Leave>", on_leave)
-    
 
     # --- RETURN ALL IMPORTANT WIDGETS ---
     return {
@@ -152,11 +150,11 @@ def build_ui(root):
         "thumb": thumb,
         "search_frame": search_frame,
         "search_entry": search_entry,
-        "btn_white": btn_white,
-        "btn_blue": btn_blue,
         "btn_yellow": btn_yellow,
         "btn_green": btn_green,
         "btn_red": btn_red,
+        "btn_blue": btn_blue,
+        "btn_white": btn_white,  
     }
     
 

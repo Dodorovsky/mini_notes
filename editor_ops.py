@@ -27,7 +27,7 @@ def zoom_with_wheel(event, text, font_family, font_size_state):
     else:
         decrease_font_size(text, font_family, font_size_state)
 
-
+ 
 # -----------------------------
 # SEARCH BAR
 # -----------------------------
@@ -77,7 +77,7 @@ def apply_color(text, tag):
     except tk.TclError:
         return
 
-    for t in ["color_red", "color_blue", "color_green", "color_yellow", "color_white"]:
+    for t in ["color_red", "color_blue", "color_green", "color_white", "color_yellow"]:
         text.tag_remove(t, start, end)
 
     text.tag_add(tag, start, end)
@@ -101,6 +101,9 @@ def change_text_color(text, color):
     except Exception as e:
         messagebox.showerror("Error", f"Could not change text color: {e}")
 
+def change_text_to_green(text):
+    change_text_color(text, "#4CB562")
+    
 def change_text_to_white(text):
     change_text_color(text, "#CCCCCC")
 
@@ -111,10 +114,6 @@ def change_text_to_blue(text):
 
 def change_text_to_red(text):
     change_text_color(text, "#DE3B28")
-
-
-def change_text_to_green(text):
-    change_text_color(text, "#4CB562")
 
 
 def change_text_to_yellow(text):

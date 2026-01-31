@@ -13,11 +13,11 @@ from editor_ops import (
     search_text,
     clear_search_highlight,
     apply_color,
-    change_text_to_white,
-    change_text_to_blue,
-    change_text_to_red,
-    change_text_to_green,
     change_text_to_yellow,
+    change_text_to_green,
+    change_text_to_red,
+    change_text_to_blue,
+    change_text_to_white,
     increase_font_size,
     decrease_font_size,
     has_color_tags,
@@ -97,11 +97,12 @@ def run_app():
     # CONTEXT MENU (Right-click)
     # -------------------------
     context_menu = tk.Menu(text, tearoff=0)
-    context_menu.add_command(label="White", command=lambda: change_text_to_white(text))
-    context_menu.add_command(label="Blue", command=lambda: change_text_to_blue(text))
     context_menu.add_command(label="Yellow", command=lambda: change_text_to_yellow(text))
     context_menu.add_command(label="Green", command=lambda: change_text_to_green(text))
     context_menu.add_command(label="Red", command=lambda: change_text_to_red(text))
+    context_menu.add_command(label="Blue", command=lambda: change_text_to_blue(text))
+    context_menu.add_command(label="White", command=lambda: change_text_to_white(text))
+
 
     def show_context_menu(event):
         context_menu.tk_popup(event.x_root, event.y_root)
