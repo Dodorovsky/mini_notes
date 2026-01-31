@@ -4,6 +4,8 @@ import sys
 import json
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from locks import is_file_already_open, remove_file_lock
+
 
 
 # -----------------------------
@@ -41,6 +43,8 @@ def reset_original_content(state, text, export_with_colors, has_color_tags):
 # LOAD FILE
 # -----------------------------
 def load_file(file_path, text, root, state, import_with_colors, export_with_colors):
+
+
     """
     state = {
         "original_content": ...,
@@ -180,6 +184,11 @@ def save_file(text, state, export_with_colors, get_current_content):
 # WINDOW CLOSE HANDLING
 # -----------------------------
 def on_closing(root, text, state, save_file, has_unsaved_changes):
+    
+
+    if state["current_file_path"]:
+        remove_file_lock(state["current_file_path"])
+
     if has_unsaved_changes(text):
         response = messagebox.askyesnocancel(
             "Confirm Exit", "Do you want to save changes before closing?"

@@ -1,9 +1,11 @@
-import sys, ctypes
+import sys, ctypes, os
+
 import tkinter as tk
 from tkinter import messagebox
-
 from ui import build_ui
 from config import FONT_FAMILY, FONT_SIZE
+
+from locks import is_file_already_open, create_file_lock
 
 # Editor logic
 from editor_ops import (
@@ -40,6 +42,17 @@ from file_ops import (
 
 
 def run_app():
+    # Si se abrió Mini Notes con un archivo como argumento
+    if len(sys.argv) > 1:
+        file_path = sys.argv[1]
+
+        # Si ya está abierto → cerrar esta instancia
+        if is_file_already_open(file_path):
+            return  # NO abrir otra ventana
+
+        # Si no está abierto → crear lock
+        create_file_lock(file_path)
+
     root = tk.Tk()
     root.update_idletasks()
     def enable_dark_title_bar(window):
@@ -223,7 +236,7 @@ def run_app():
         state["original_content"] = ""
         state["file_format"] = "txt"
         state["current_file_path"] = None
-
+        
     # -------------------------
     # WINDOW CLOSE HANDLER
     # -------------------------
