@@ -92,6 +92,7 @@ def run_app():
     ui["btn_green"].config(command=lambda: change_text_to_green(text))
     ui["btn_red"].config(command=lambda: change_text_to_red(text))
     
+    
     # -------------------------
     # CONTEXT MENU (Right-click)
     # -------------------------
@@ -158,6 +159,9 @@ def run_app():
     
     root.bind("<Control-f>", lambda e: show_search_bar(search_frame, search_entry))
 
+    root.bind("<Control-s>", lambda e: save_file(text, state, export_with_colors, get_current_content))
+    root.bind("<Control-S>", lambda e: save_file(text, state, export_with_colors, get_current_content))  
+
     search_entry.bind("<KeyRelease>", lambda e: search_text(e, text, search_entry))
 
     # -------------------------
@@ -195,6 +199,9 @@ def run_app():
         load_file(
             sys.argv[1], text, root, state, import_with_colors, export_with_colors
         )
+        
+
+
     else:
         text.insert("1.0", "")
         state["original_content"] = ""

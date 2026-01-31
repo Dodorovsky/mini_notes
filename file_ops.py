@@ -137,9 +137,17 @@ def _perform_save(
 
 
 def save_file_as(text, state, export_with_colors, get_current_content):
+    initial_dir = os.path.expanduser("~/Documents")
+
     file_path = filedialog.asksaveasfilename(
-        defaultextension=".txt",
-        filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+        initialdir=initial_dir,
+        defaultextension=".mini",
+        filetypes=[
+            ("Mini Notes", "*.mini"),
+            ("NP100 Notes", "*.np100"),
+            ("Text files", "*.txt"),
+            ("All files", "*.*")
+        ],
         title="Save notes as...",
     )
 

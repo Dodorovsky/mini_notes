@@ -50,6 +50,7 @@ def build_ui(root):
     )
     scroll_canvas.pack(side="right", fill="y")
 
+    # Thumb inicial
     thumb = scroll_canvas.create_rectangle(
         0, 0, 12, 40,
         fill=POWERSHELL_ACCENT,
@@ -96,3 +97,9 @@ def build_ui(root):
         "btn_green": btn_green,
         "btn_red": btn_red,
     }
+    
+
+
+
+
+    
