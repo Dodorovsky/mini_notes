@@ -4,7 +4,7 @@ from tkinter import messagebox
 import json
 import re
 
-
+ 
 # -----------------------------
 # FONT SIZE
 # -----------------------------
@@ -42,6 +42,7 @@ def hide_search_bar(search_frame, text):
 
 
 def search_text(event, text, search_entry):
+    
     query = search_entry.get()
     clear_search_highlight(text)
 

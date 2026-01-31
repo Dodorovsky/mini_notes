@@ -42,15 +42,15 @@ from file_ops import (
 
 
 def run_app():
-    # Si se abrió Mini Notes con un archivo como argumento
+    # If mini_notes was opened with a file as an argument
     if len(sys.argv) > 1:
         file_path = sys.argv[1]
 
-        # Si ya está abierto → cerrar esta instancia
+        # If it is already open → close this instance
         if is_file_already_open(file_path):
-            return  # NO abrir otra ventana
+            return  # DO NOT open another window
 
-        # Si no está abierto → crear lock
+        # If it is not open → create lock
         create_file_lock(file_path)
 
     root = tk.Tk()
@@ -156,11 +156,11 @@ def run_app():
         e, text, FONT_FAMILY, state["font_size_state"]
     ))
 
-    # Zoom con Ctrl + +
+    # Zoom with Ctrl + +
     root.bind("<Control-plus>", lambda e: increase_font_size(text, FONT_FAMILY, state["font_size_state"]))
     root.bind("<Control-KP_Add>", lambda e: increase_font_size(text, FONT_FAMILY, state["font_size_state"]))  
 
-    # Zoom con Ctrl + -
+    # Zoom with Ctrl + -
     root.bind("<Control-minus>", lambda e: decrease_font_size(text, FONT_FAMILY, state["font_size_state"]))
     root.bind("<Control-KP_Subtract>", lambda e: decrease_font_size(text, FONT_FAMILY, state["font_size_state"])) 
 
@@ -172,7 +172,7 @@ def run_app():
 
     search_entry.bind("<KeyRelease>", lambda e: search_text(e, text, search_entry))
 
-    # Submenú de colores
+    # Color submenu
     color_submenu = tk.Menu(format_menu, tearoff=0, bg="#1C1C1B", fg="white")
 
     color_submenu.add_command(label="White", command=lambda: change_text_to_white(text))

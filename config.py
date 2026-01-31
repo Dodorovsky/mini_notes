@@ -8,8 +8,9 @@ FONT_SIZE = 13
 # Colors (PowerShell style)
 POWERSHELL_BG = "#0D0C0C"
 POWERSHELL_FG = "#CCCCCC"
-POWERSHELL_ACCENT = "#5fe2ff"  # o "#5f87ff" si prefieres
+POWERSHELL_ACCENT = "#5fe2ff"  
 POWERSHELL_ACCENT_HOVER = "#fbeb9d"
 
 # File types
 FILE_TYPES = [("Text Files", "*.txt"), ("All Files", "*.*")]
+ 

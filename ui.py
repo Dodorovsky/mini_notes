@@ -1,5 +1,7 @@
 import tkinter as tk
 from file_ops import open_file
+from editor_ops import clear_search_highlight
+
 from config import (
     WINDOW_TITLE, FONT_FAMILY, FONT_SIZE,
     POWERSHELL_ACCENT, POWERSHELL_BG, POWERSHELL_FG, POWERSHELL_ACCENT_HOVER
@@ -21,7 +23,7 @@ def build_ui(root):
     toolbar.pack_propagate(False)
     toolbar.config(height=20)
 
-    # Buttons (solo UI)
+    # Buttons (only UI)
     btn_white = tk.Button(toolbar, text="000", fg="#CCCCCC", bg="#CCCCCC")
     btn_white.pack(side=tk.LEFT, padx=(10, 5), pady=(3, 2))
 
@@ -51,7 +53,7 @@ def build_ui(root):
     )
     scroll_canvas.pack(side="right", fill="y")
 
-    # Thumb inicial
+    # Initial Thumb
     thumb = scroll_canvas.create_rectangle(
         0, 0, 12, 40,
         fill=POWERSHELL_ACCENT,
@@ -75,16 +77,27 @@ def build_ui(root):
     )
     
     text.pack(side="left", expand=True, fill="both")
+    text.tag_config("search_highlight", background="yellow", foreground="black")
+
+
 
     # --- SEARCH BAR ---
-    search_frame = tk.Frame(root)
-    search_entry = tk.Entry(search_frame)
+    search_frame = tk.Frame(root, bg="#414040")
+    search_entry = tk.Entry(search_frame, bg="#414040", fg="#FDFDFB", font="Consolas",insertbackground="#FFFFFE")
     search_entry.pack(side="left", fill="x", expand=True)
-
-    close_search_btn = tk.Button(search_frame, text="X")
-    close_search_btn.pack(side="right")
     
-    # --- FUNCIONES DE SINCRONIZACIÓN ---
+    def close_search_panel():
+        search_frame.pack_forget()
+        search_entry.delete(0, "end")
+        clear_search_highlight(text)
+        text.focus_set()
+
+    close_search_btn = tk.Button(search_frame, text="X", fg="white", bg="black", command=close_search_panel)
+    close_search_btn.pack(side="right")
+
+
+    
+    # --- SYNCHRONIZATION FUNCTIONS ---
 
     def update_scrollbar(first, last):
         """
@@ -95,7 +108,7 @@ def build_ui(root):
 
         canvas_height = scroll_canvas.winfo_height()
 
-        # Tamaño mínimo del thumb
+        # Minimum thumb size
         thumb_height = max(40, (last - first) * canvas_height)
 
         y1 = first * canvas_height
@@ -111,15 +124,15 @@ def build_ui(root):
         canvas_height = scroll_canvas.winfo_height()
         y = event.y
 
-        # Limitar dentro del canvas
+        # Limit within the canvas
         y = max(0, min(canvas_height, y))
 
-        # Convertir posición del canvas → fracción de scroll
+        # Convert canvas position → scroll fraction
         fraction = y / canvas_height
         text.yview_moveto(fraction)
 
 
-    # --- EVENTOS DEL THUMB ---
+    # --- THUMB EVENTS ---
 
     def on_enter(event):
         scroll_canvas.itemconfig(thumb, fill=POWERSHELL_ACCENT_HOVER)
@@ -128,16 +141,16 @@ def build_ui(root):
         scroll_canvas.itemconfig(thumb, fill=POWERSHELL_ACCENT)
 
 
-    # --- ENLACES ---
+    # --- LINKS ---
 
-    # El Text avisa al Canvas cuando se mueve
+    # Thumb Hover
     text.config(yscrollcommand=update_scrollbar)
 
-    # El Canvas controla al Text cuando arrastras el thumb
+    # The Text alerts the Canvas when it moves
     scroll_canvas.bind("<B1-Motion>", on_drag)
     scroll_canvas.bind("<Button-1>", on_drag)
 
-    # Hover del thumb
+    
     scroll_canvas.tag_bind(thumb, "<Enter>", on_enter)
     scroll_canvas.tag_bind(thumb, "<Leave>", on_leave)
 
