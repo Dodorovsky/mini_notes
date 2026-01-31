@@ -1,7 +1,7 @@
 import tkinter as tk
 from config import (
     WINDOW_TITLE, FONT_FAMILY, FONT_SIZE,
-    POWERSHELL_ACCENT, POWERSHELL_BG, POWERSHELL_FG
+    POWERSHELL_ACCENT, POWERSHELL_BG, POWERSHELL_FG, POWERSHELL_ACCENT_HOVER
 )
 
 def build_ui(root):
@@ -57,6 +57,9 @@ def build_ui(root):
         outline=POWERSHELL_ACCENT
     )
 
+
+
+
     # --- TEXT WIDGET ---
     text = tk.Text(
         editor_frame,
@@ -81,6 +84,64 @@ def build_ui(root):
 
     close_search_btn = tk.Button(search_frame, text="X")
     close_search_btn.pack(side="right")
+    
+    # --- FUNCIONES DE SINCRONIZACIÓN ---
+
+    def update_scrollbar(first, last):
+        """
+        Actualiza la posición y tamaño del thumb cuando el Text hace scroll.
+        """
+        first = float(first)
+        last = float(last)
+
+        canvas_height = scroll_canvas.winfo_height()
+
+        # Tamaño mínimo del thumb
+        thumb_height = max(40, (last - first) * canvas_height)
+
+        y1 = first * canvas_height
+        y2 = y1 + thumb_height
+
+        scroll_canvas.coords(thumb, 0, y1, 12, y2)
+
+
+    def on_drag(event):
+        """
+        Permite arrastrar el thumb para mover el texto.
+        """
+        canvas_height = scroll_canvas.winfo_height()
+        y = event.y
+
+        # Limitar dentro del canvas
+        y = max(0, min(canvas_height, y))
+
+        # Convertir posición del canvas → fracción de scroll
+        fraction = y / canvas_height
+        text.yview_moveto(fraction)
+
+
+    # --- EVENTOS DEL THUMB ---
+
+    def on_enter(event):
+        scroll_canvas.itemconfig(thumb, fill=POWERSHELL_ACCENT_HOVER)
+
+    def on_leave(event):
+        scroll_canvas.itemconfig(thumb, fill=POWERSHELL_ACCENT)
+
+
+    # --- ENLACES ---
+
+    # El Text avisa al Canvas cuando se mueve
+    text.config(yscrollcommand=update_scrollbar)
+
+    # El Canvas controla al Text cuando arrastras el thumb
+    scroll_canvas.bind("<B1-Motion>", on_drag)
+    scroll_canvas.bind("<Button-1>", on_drag)
+
+    # Hover del thumb
+    scroll_canvas.tag_bind(thumb, "<Enter>", on_enter)
+    scroll_canvas.tag_bind(thumb, "<Leave>", on_leave)
+    
 
     # --- RETURN ALL IMPORTANT WIDGETS ---
     return {
