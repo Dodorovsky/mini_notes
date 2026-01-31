@@ -22,19 +22,19 @@ def build_ui(root):
     toolbar.config(height=20)
 
     # Buttons (solo UI)
-    btn_white = tk.Button(toolbar, text="00", fg="#CCCCCC", bg="#CCCCCC")
+    btn_white = tk.Button(toolbar, text="000", fg="#CCCCCC", bg="#CCCCCC")
     btn_white.pack(side=tk.LEFT, padx=(10, 5), pady=(3, 2))
 
-    btn_blue = tk.Button(toolbar, text="00", fg="#8AB5FF", bg="#8AB5FF")
+    btn_blue = tk.Button(toolbar, text="000", fg="#8AB5FF", bg="#8AB5FF")
     btn_blue.pack(side=tk.LEFT, padx=0, pady=(3, 2))
 
-    btn_yellow = tk.Button(toolbar, text="00", fg="#F0E197", bg="#F0E197")
+    btn_yellow = tk.Button(toolbar, text="000", fg="#F0E197", bg="#F0E197")
     btn_yellow.pack(side=tk.LEFT, padx=(280, 0), pady=(3, 2))
 
-    btn_green = tk.Button(toolbar, text="00", fg="#4CB562", bg="#4CB562")
+    btn_green = tk.Button(toolbar, text="000", fg="#4CB562", bg="#4CB562")
     btn_green.pack(side=tk.LEFT, padx=5, pady=(3, 2))
 
-    btn_red = tk.Button(toolbar, text="00", fg="#DE3B28", bg="#DE3B28")
+    btn_red = tk.Button(toolbar, text="000", fg="#DE3B28", bg="#DE3B28")
     btn_red.pack(side=tk.LEFT, pady=(3, 2))
 
     # --- MAIN EDITOR FRAME ---

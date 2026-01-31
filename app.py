@@ -96,7 +96,7 @@ def run_app():
     # -------------------------
     # CONTEXT MENU (Right-click)
     # -------------------------
-    context_menu = tk.Menu(text, tearoff=0)
+    context_menu = tk.Menu(text, tearoff=0, bg="#4A4A4A", fg="white")
     context_menu.add_command(label="Yellow", command=lambda: change_text_to_yellow(text))
     context_menu.add_command(label="Green", command=lambda: change_text_to_green(text))
     context_menu.add_command(label="Red", command=lambda: change_text_to_red(text))
@@ -117,7 +117,7 @@ def run_app():
 
     # FILE MENU
     file_btn = tk.Menubutton(menubar, text="File", bg="#4A4A4A", fg="white")
-    file_menu = tk.Menu(file_btn, tearoff=0)
+    file_menu = tk.Menu(file_btn, tearoff=0, bg="#4A4A4A", fg="white")
     file_menu.add_command(label="Open", command=lambda: open_file(
         text, root, state, import_with_colors, export_with_colors
     ))
@@ -131,16 +131,10 @@ def run_app():
     file_btn.pack(side="left")
 
     # FORMAT MENU
+    
     format_btn = tk.Menubutton(menubar, text="Format", bg="#4A4A4A", fg="white")
-    format_menu = tk.Menu(format_btn, tearoff=0)
-    format_menu.add_command(label="Increase Font", command=lambda: increase_font_size(
-        text, FONT_FAMILY, state["font_size_state"]
-    ))
-    format_menu.add_command(label="Decrease Font", command=lambda: decrease_font_size(
-        text, FONT_FAMILY, state["font_size_state"]
-    ))
-    format_btn.config(menu=format_menu)
-    format_btn.pack(side="left")
+
+    format_menu = tk.Menu(format_btn, tearoff=0, bg="#4A4A4A", fg="white")
 
     # -------------------------
     # BINDS
@@ -148,7 +142,7 @@ def run_app():
     root.bind("<Control-MouseWheel>", lambda e: zoom_with_wheel(
         e, text, FONT_FAMILY, state["font_size_state"]
     ))
-    
+
     # Zoom con Ctrl + +
     root.bind("<Control-plus>", lambda e: increase_font_size(text, FONT_FAMILY, state["font_size_state"]))
     root.bind("<Control-KP_Add>", lambda e: increase_font_size(text, FONT_FAMILY, state["font_size_state"]))  
@@ -165,6 +159,27 @@ def run_app():
 
     search_entry.bind("<KeyRelease>", lambda e: search_text(e, text, search_entry))
 
+    # Submenú de colores
+    color_submenu = tk.Menu(format_menu, tearoff=0, bg="#1C1C1B", fg="white")
+
+    color_submenu.add_command(label="White", command=lambda: change_text_to_white(text))
+    color_submenu.add_command(label="Blue", command=lambda: change_text_to_blue(text))
+    color_submenu.add_command(label="Yellow", command=lambda: change_text_to_yellow(text))
+    color_submenu.add_command(label="Green", command=lambda: change_text_to_green(text))
+    color_submenu.add_command(label="Red", command=lambda: change_text_to_red(text))
+    
+    format_menu.add_cascade(label="Text Color", menu=color_submenu)
+    format_menu.add_separator()
+    
+    format_menu.add_command(label="Increase Font Size (Ctrl ++)", command=lambda: increase_font_size(
+        text, FONT_FAMILY, state["font_size_state"]
+    ))
+    format_menu.add_command(label="Decrease Font Size (Ctrl +-)", command=lambda: decrease_font_size(
+        text, FONT_FAMILY, state["font_size_state"]
+    ))
+    format_btn.config(menu=format_menu)
+    format_btn.pack(side="left")
+    
     # -------------------------
     # SCROLLBAR LOGIC
     # -------------------------
